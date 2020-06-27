@@ -1,0 +1,23 @@
+server:
+  port: 7610
+spring:
+  application:
+    name: ofo-gateway
+eureka: #进行注册
+  client:
+    service-url:
+      defaultZone: http://localhost:8081/eureka/
+  instance: #自定义注册中心在线实例的名称
+    prefer-ip-address: true
+    instance-id: ofo-gateway
+info:       #自定义应用信息
+  app.name: ofo-gateway
+  company.name: null
+  build.artifactId: $project.artifactId$
+  build.verstion: $project.verstion$
+feign: #开启feign服务调用异常时的熔断机制，防止服务雪崩效应
+  hystrix:
+    enabled: true
+  httpclient:
+    connection-timer-repeat: 5000 #尝试与服务建立连接最长等待时间
+    connection-timeout: 3000 #最长等待服务回应时间

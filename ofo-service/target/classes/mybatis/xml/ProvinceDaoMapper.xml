@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cn.cloud.ofo.service.dao.ProvinceDao">
+    <sql id="list">id,name</sql>
+
+    <!-- 查询所有的省份-->
+    <select id="selectAll" parameterType="Province" resultType="Province">
+        select <include refid="list"/>
+        from province;
+    </select>
+
+</mapper>

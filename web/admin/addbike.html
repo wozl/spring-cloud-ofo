@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>添加车辆信息</title>
+		<link rel="stylesheet" href="../zui/css/zui.min.css" />
+		<link rel="stylesheet" href="../zui/lib/datatable/zui.datatable.min.css" />
+		<script type="text/javascript" src="../zui/lib/jquery/jquery.js" ></script>
+		<script src="../zui/lib/datatable/zui.datatable.min.js"></script>
+		<script type="text/javascript" src="../zui/js/zui.min.js" ></script>
+	</head>
+	<body>
+		
+		<div style="width:1100px;">
+   	 	<br>
+    	<br>
+    	<button class="btn btn-primary" type="button" >请选择：</button>
+		<div class="input-group" style="position:absolute;left:80px;top:40px;">
+		    <select class="form-control" id="Province" name="Province" onchange="getCity();" >
+		        <option>省份</option>
+		    </select> 
+		</div>
+    
+	    <div class="input-group" style="position:absolute;left:250px;top:40px;">
+	      	<select class="form-control" name="city" id="city" >
+	        	<option>市/县</option>
+	      	</select> 
+	    </div>
+    	
+       	<div class="input-group">
+ 			<span class="input-group-addon"><i class="icon icon-user"></i>&nbsp;&nbsp;&nbsp;车牌号：&nbsp;&nbsp;&nbsp;</span>
+  			<input type="text" class="form-control" placeholder="车牌号"  id="bikesno" name="bikesno" >
+ 				
+		</div>
+          	<br>
+            <br>
+        <div class="input-group">
+ 			<span class="input-group-addon"><i class="icon icon-key"></i>&nbsp;&nbsp;&nbsp;密&nbsp;&nbsp;&nbsp;码：&nbsp;&nbsp;&nbsp;</span>
+  			<input type="password" class="form-control" placeholder="密码" id="bikespassword" name="bikespassword" >
+ 				
+		</div>
+            <br>
+            <br>
+        <button class="btn btn-block btn-primary" type="submit" onclick="add();">点击添加</button>
+       
+    </div>
+		
+	</body>
+	
+	<script type="text/javascript">
+		window.onload=function (){
+			getProvince();
+			
+		};
+	
+	$(function(){
+			if(GateCookie("token")==false){
+				new $.zui.Messager('登录状态已失效，请重新登录!',{
+							icon:'exclamation-sign',
+							type:'warning'
+						}).show();
+				setTimeout(function(){
+					window.location.href="../login.html";
+				},2000); //2秒后跳转到登录页面
+			}
+		});
+		
+		//读取cookie
+	   function GateCookie(name){
+	   		var nameEQ = name + '=';
+			  var ca = document.cookie.split(';'); // 把cookie分割成组
+			  for (var i = 0; i < ca.length; i++) {
+			    var c = ca[i]; // 取得字符串
+			    while (c.charAt(0) == ' ') { // 判断一下字符串有没有前导空格
+			      c = c.substring(1, c.length); // 有的话，从第二位开始取
+			    }
+			    if (c.indexOf(nameEQ) == 0) { // 如果含有我们要的name
+			      return unescape(c.substring(nameEQ.length, c.length)); // 解码并截取我们要值
+			    }
+			  }
+			  return false;
+	   };
+	   
+	   /*加载省下拉*/	
+		function getProvince(){
+					var auth;
+					if(GateCookie("token")==false){
+						auth="";
+					}else{
+						auth=GateCookie("token");
+					}
+					$.ajax({
+						  headers: {
+						        auth: GateCookie("token")
+						    },
+						type:'post',
+						url:'/api/ofo/GetProvinceInfo',
+						success: function(data){
+							data=JSON.parse(data);
+							if(data.code==1021){
+								new $.zui.Messager(data.msg,{
+									icon:'exclamation-sign',
+									type:'danger'
+								}).show();
+								setTimeout(function(){
+									window.location.href="../login.html";
+								},2000); //2秒后跳转到登录页面
+							}
+							else if(data.code==1002){
+								new $.zui.Messager(data.msg,{
+									icon:'exclamation-sign',
+									type:'danger'
+								}).show();
+								setTimeout(function(){
+									window.location.href="../login.html";
+								},2000); //2秒后跳转到登录页面
+							}
+							else if(data.code==1){
+								if(data.data.length>0){
+									data=data.data;
+									for (var i = 0; i < data.length; i++) {  
+					                    $('#Province').append("<option value='" + data[i].id + "' >" + data[i].name + "</option>");  
+					                } 
+								}else{
+									 $('#Province').append('<option value="">暂无数据</option>');
+								}
+							}else{
+								new $.zui.Messager(data.msg,{
+									icon:'exclamation-sign',
+									type:'danger'
+								}).show();
+							}
+							 
+						},
+						error:function(){
+							new $.zui.Messager("系统繁忙，加载省份数据失败，请稍后再试!",{
+									icon:'exclamation-sign',
+									type:'warning'
+								}).show();
+						}
+				});
+		};
+		
+		
+		 /*加载市下拉选*/ 
+ 
+	 function getCity() {  
+		 	var id=$("#Province").val();
+		 	$("#city").empty();
+		 	var auth;
+			if(GateCookie("token")==false){
+						auth="";
+					}else{
+						auth=GateCookie("token");
+					}
+				$.ajax({
+						  headers: {
+						        auth: GateCookie("token")
+						    },
+					 		type:'post',
+					 		url:'/api/ofo/GetCityInfo',
+					 		data: {"id":id},
+					 		success: function(data){
+					 			data=JSON.parse(data);
+								if(data.code==1021){
+									new $.zui.Messager(data.msg,{
+										icon:'exclamation-sign',
+										type:'danger'
+									}).show();
+									setTimeout(function(){
+										window.location.href="../login.html";
+									},2000); //2秒后跳转到登录页面
+								}
+								else if(data.code==1002){
+									new $.zui.Messager(data.msg,{
+										icon:'exclamation-sign',
+										type:'danger'
+									}).show();
+									setTimeout(function(){
+										window.location.href="../login.html";
+									},2000); //2秒后跳转到登录页面
+								}
+								else if(data.code==1){
+									data=data.data;
+									if(data.length>0){
+										$('#city').append("<option value='' selected='selected' >" + '请选择' + "</option>"); 
+							 			 for (var i = 0; i < data.length; i++) {  
+							                 $('#city').append("<option value='" + data[i].id + "' >" + data[i].name + "</option>");  
+							             } 
+									}else{
+										$('#city').append("<option value=''>" + '暂无数据' + "</option>");
+									}
+								}else{
+									new $.zui.Messager(data.msg,{
+										icon:'exclamation-sign',
+										type:'danger'
+									}).show();
+								}
+					 		},
+					 		error:function(){
+					 			new $.zui.Messager("系统繁忙，加载市区数据失败，请稍后再试!",{
+									icon:'exclamation-sign',
+									type:'warning'
+								}).show();
+					 		}
+					 	});
+	 };
+	 
+	 /**添加车辆信息**/
+	 function add(){
+ 		var cityid=$("#city").val();
+ 		var bikeno=document.getElementById("bikesno").value;
+ 		var password=document.getElementById("bikespassword").value;
+ 		var id=null;
+ 		
+ 		if((!isNaN(bikeno))&&(!isNaN(password))){
+ 			if(bikeno.length<=7&&password.length<=4){
+ 				var auth;
+				if(GateCookie("token")==false){
+							auth="";
+						}else{
+							auth=GateCookie("token");
+						}
+				$.ajax({
+							headers: {
+							    auth: GateCookie("token")
+							    },
+		 		 			type:'post',
+		 		 			url:'/api/admin/AddBikeInfo',
+		 		 			data:{"id":id,"bikeno":bikeno,"password":password,"cityid":cityid},
+		 		 			success:function(data){
+		 		 				data=JSON.parse(data);
+		 		 				if(data.code==1){
+		 		 					new $.zui.Messager("添加成功!",{
+										icon:'exclamation-sign',
+										type:'success'
+									}).show();
+									setTimeout(function(){
+											location.reload();
+										},2000); //2秒后重新加载页面
+		 		 				}
+		 		 				else if(data.code==0){
+		 		 					new $.zui.Messager("添加失败，请稍后再试!",{
+										icon:'exclamation-sign',
+										type:'warning'
+									}).show();
+		 		 				}
+		 		 				else if(data.code==-1){
+		 		 					new $.zui.Messager(data.msg,{
+										icon:'exclamation-sign',
+										type:'warning'
+									}).show();
+		 		 				}else{
+		 		 					new $.zui.Messager(data.msg,{
+										icon:'exclamation-sign',
+										type:'danger'
+									}).show();
+		 		 				}
+		 		 				//alert("添加成功!");
+		 		 				//window.location.assign("/ofo/admin/addbike.do");
+		 		 			},
+		 		 			error:function(){
+		 		 				alert("添加失败!");
+		 		 			}
+		 		 		});
+		 			}else{
+		 				new $.zui.Messager("输入参数不合法！原因：输入的不是数字或者输入的数字超过了长度。车牌号为6位数字，密码为4位数字",{
+									icon:'exclamation-sign',
+									type:'warning'
+								}).show();
+		 				//alert("输入参数不合法！原因：\n输入的不是数字或者输入的数字超过了长度。\n车牌号为6位数字，密码为4位数字");
+		 			}
+		 	
+		 		}else{
+		 			new $.zui.Messager("输入参数不合法！原因：输入的不是数字或者输入的数字超过了长度。车牌号为6位数字，密码为4位数字",{
+									icon:'exclamation-sign',
+									type:'warning'
+								}).show();
+		 			//alert("输入参数不合法！原因：\n输入的不是数字或者输入的数字超过了长度。\n车牌号为6位数字，密码为4位数字");
+		 		}
+ 	};
+	</script>
+</html>

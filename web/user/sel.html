@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>查询车辆信息</title>
+	</head>
+	<link rel="stylesheet" href="../zui/css/zui.min.css" />
+	<link rel="stylesheet" href="../zui/lib/datatable/zui.datatable.min.css" />
+	<script type="text/javascript" src="../zui/lib/jquery/jquery.js" ></script>
+	<script src="../zui/lib/datatable/zui.datatable.min.js"></script>
+	<script type="text/javascript" src="../zui/js/zui.min.js" ></script>
+	<body>
+		<div>
+		  <button class="btn btn-primary" type="button"  onclick="getBike();">查询</button>  
+		  <div class="input-group" style="position:absolute;left:80px;top:0px;">
+		 
+		      <select class="form-control" id="Province" name="Province" onchange="getCity();" >
+		        <option>省份</option>
+		      </select> 
+		  </div>
+		    
+		   <div class="input-group" style="position:absolute;left:250px;top:0px;">
+		      <select class="form-control" name="city" id="city" onchange="getBike();">
+		        <option>市/县</option>
+		      </select> 
+		   </div> 
+		   
+		    <div style="width:450px;">
+		    <table class="table datatable">
+		      <thead>
+		        <tr>
+		          <th class="flex-col">车牌号</th> 
+		          <th class="flex-col">密码</th>
+		        </tr>
+		      </thead>
+		      <tbody id="bike" >
+		       	
+		      </tbody>
+			</table>
+			</div>
+			
+		</div>
+	</body>
+	<script type="text/javascript">
+		
+		window.onload=function (){
+			getProvince();
+			
+		};
+		
+		$(function(){
+			if(GateCookie("token")==false){
+				new $.zui.Messager('登录状态已失效，请重新登录!',{
+							icon:'exclamation-sign',
+							type:'warning'
+						}).show();
+				setTimeout(function(){
+					window.location.href="../login.html";
+				},2000); //2秒后跳转到登录页面
+			}
+		});
+		
+		//读取cookie
+	   function GateCookie(name){
+	   		var nameEQ = name + '=';
+			  var ca = document.cookie.split(';'); // 把cookie分割成组
+			  for (var i = 0; i < ca.length; i++) {
+			    var c = ca[i]; // 取得字符串
+			    while (c.charAt(0) == ' ') { // 判断一下字符串有没有前导空格
+			      c = c.substring(1, c.length); // 有的话，从第二位开始取
+			    }
+			    if (c.indexOf(nameEQ) == 0) { // 如果含有我们要的name
+			      return unescape(c.substring(nameEQ.length, c.length)); // 解码并截取我们要值
+			    }
+			  }
+			  return false;
+	   };
+	   
+	   /*加载省下拉*/	
+		function getProvince(){
+					var auth;
+					if(GateCookie("token")==false){
+						auth="";
+					}else{
+						auth=GateCookie("token");
+					}
+					$.ajax({
+						  headers: {
+						        auth: GateCookie("token")
+						    },
+						type:'post',
+						url:'/api/ofo/GetProvinceInfo',
+						success: function(data){
+							data=JSON.parse(data);
+							if(data.code==1021){
+								new $.zui.Messager(data.msg,{
+									icon:'exclamation-sign',
+									type:'danger'
+								}).show();
+								setTimeout(function(){
+									window.location.href="../login.html";
+								},2000); //2秒后跳转到登录页面
+							}
+							else if(data.code==1002){
+								new $.zui.Messager(data.msg,{
+									icon:'exclamation-sign',
+									type:'danger'
+								}).show();
+								setTimeout(function(){
+									window.location.href="../login.html";
+								},2000); //2秒后跳转到登录页面
+							}
+							else if(data.code==1){
+								if(data.data.length>0){
+									data=data.data;
+									for (var i = 0; i < data.length; i++) {  
+					                    $('#Province').append("<option value='" + data[i].id + "' >" + data[i].name + "</option>");  
+					                } 
+								}else{
+									 $('#Province').append('<option value="">暂无数据</option>');
+								}
+							}else{
+								new $.zui.Messager(data.msg,{
+									icon:'exclamation-sign',
+									type:'danger'
+								}).show();
+							}
+							 
+						},
+						error:function(){
+							new $.zui.Messager("系统繁忙，加载省份数据失败，请稍后再试!",{
+									icon:'exclamation-sign',
+									type:'warning'
+								}).show();
+						}
+				});
+		};
+		
+		
+		 /*加载市下拉选*/ 
+ 
+	 function getCity() {  
+		 	var id=$("#Province").val();
+		 	$("#city").empty();
+		 	var auth;
+			if(GateCookie("token")==false){
+						auth="";
+					}else{
+						auth=GateCookie("token");
+					}
+				$.ajax({
+						  headers: {
+						        auth: GateCookie("token")
+						    },
+					 		type:'post',
+					 		url:'/api/ofo/GetCityInfo',
+					 		data: {"id":id},
+					 		success: function(data){
+					 			data=JSON.parse(data);
+								if(data.code==1021){
+									new $.zui.Messager(data.msg,{
+										icon:'exclamation-sign',
+										type:'danger'
+									}).show();
+									setTimeout(function(){
+										window.location.href="../login.html";
+									},2000); //2秒后跳转到登录页面
+								}
+								else if(data.code==1002){
+									new $.zui.Messager(data.msg,{
+										icon:'exclamation-sign',
+										type:'danger'
+									}).show();
+									setTimeout(function(){
+										window.location.href="../login.html";
+									},2000); //2秒后跳转到登录页面
+								}
+								else if(data.code==1){
+									data=data.data;
+									if(data.length>0){
+										$('#city').append("<option value='' selected='selected' >" + '请选择' + "</option>"); 
+							 			 for (var i = 0; i < data.length; i++) {  
+							                 $('#city').append("<option value='" + data[i].id + "' >" + data[i].name + "</option>");  
+							             } 
+									}else{
+										$('#city').append("<option value=''>" + '暂无数据' + "</option>");
+									}
+								}else{
+									new $.zui.Messager(data.msg,{
+										icon:'exclamation-sign',
+										type:'danger'
+									}).show();
+								}
+					 		},
+					 		error:function(){
+					 			new $.zui.Messager("系统繁忙，加载市区数据失败，请稍后再试!",{
+									icon:'exclamation-sign',
+									type:'warning'
+								}).show();
+					 		}
+					 	});
+	 };
+	 
+	 
+	  //获取车辆信息
+	 function getBike(){
+		 var cityid=$("#city").val();
+		var auth;
+			if(GateCookie("token")==false){
+						auth="";
+					}else{
+						auth=GateCookie("token");
+					}
+				$.ajax({
+						  headers: {
+						        auth: GateCookie("token")
+						    },
+						 type: 'post',
+						 url:'/api/ofo/GetBikeInfos',
+						 data:{"cityid":cityid},
+						 success:function(data){
+						 	data=JSON.parse(data);
+							if(data.code==1021){
+									new $.zui.Messager(data.msg,{
+										icon:'exclamation-sign',
+										type:'danger'
+									}).show();
+									setTimeout(function(){
+										window.location.href="../login.html";
+									},2000); //2秒后跳转到登录页面
+								}else if(data.code==1002){
+									new $.zui.Messager(data.msg,{
+										icon:'exclamation-sign',
+										type:'danger'
+									}).show();
+									setTimeout(function(){
+										window.location.href="../login.html";
+									},2000); //2秒后跳转到登录页面
+								}else if(data.code==1){
+								data=data.data;
+								if(data.length>0){
+									$("#bike").empty();
+									 for(var i=0;i<data.length;i++){
+										 $('#bike').append("<tr>"+"<td value='" + data[i].id + "' id='no'>" + data[i].bikeno + "</td>"+"<td value='" + data[i].id + "' id='no'>" + data[i].password + "</td>"+"</tr>");  
+										} 
+								}else{
+									$("#bike").empty();
+									$('#bike').html("暂无数据!"); 
+								}
+							}else{
+								new $.zui.Messager(data.msg,{
+									icon:'exclamation-sign',
+									type:'danger'
+								}).show();
+							}
+							 
+						 },
+						 error:function(){
+							new $.zui.Messager("系统繁忙，加载车辆数据失败，请稍后再试!",{
+									icon:'exclamation-sign',
+									type:'warning'
+								}).show();
+						 }
+					 });
+	 };
+	</script>
+</html>

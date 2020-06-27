@@ -1,0 +1,4 @@
+com\cn\cloud\ofo\feign\FeignApplication.class
+com\cn\cloud\ofo\feign\controller\ofoFeignController.class
+com\cn\cloud\ofo\feign\services\ofoFeignServices.class
+com\cn\cloud\ofo\feign\services\ofoFeignServicesHystrix.class

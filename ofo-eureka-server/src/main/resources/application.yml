@@ -1,0 +1,12 @@
+server:
+  port: 8081
+eureka:
+  instance:
+    hostname: localhost
+  client: ##声明不向自己进行注册
+    fetch-registry: false
+    register-with-eureka: false
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+  server:
+    enable-self-preservation: true  #开启自我保护机制

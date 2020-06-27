@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cn.cloud.ofo.service.dao.BikeDao">
+    <sql id="list">
+		id,bikeno,password,cityid
+	</sql>
+
+    <!-- 查询这个市/县下的所车辆信息-->
+    <select id="selectAll" parameterType="int"  resultType="Bike">
+        select <include refid="list" />
+        from bike where cityid=#{cityid,jdbcType=INTEGER};
+    </select>
+
+    <!-- 通过车牌号查询密码-->
+    <select id="selectByNo" resultType="Bike">
+        select <include refid="list"/>
+        from bike where bikeno=#{bikeno,jdbcType=INTEGER};
+    </select>
+
+    <!-- 添加车辆信息-->
+    <insert id="addbike" parameterType="Bike"  >
+			insert into bike values(#{id},#{bikeno},#{password},#{cityid})
+	</insert>
+
+</mapper>

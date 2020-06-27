@@ -1,0 +1,10 @@
+com\cn\cloud\ofo\service\dao\UserDao.class
+com\cn\cloud\ofo\service\controller\ofoAdminController.class
+com\cn\cloud\ofo\service\controller\ofoConteroller.class
+com\cn\cloud\ofo\service\config\RedisConfig.class
+com\cn\cloud\ofo\service\ServiceApplication.class
+com\cn\cloud\ofo\service\dao\ProvinceDao.class
+com\cn\cloud\ofo\service\service\ofoService.class
+com\cn\cloud\ofo\service\service\ofoAdminService.class
+com\cn\cloud\ofo\service\dao\BikeDao.class
+com\cn\cloud\ofo\service\dao\CityDao.class

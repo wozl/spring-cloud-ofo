@@ -1,0 +1,22 @@
+server: #运行端口
+  port: 9001
+spring:
+  application: #注册中心实例名称
+    name: ofo-hystrix-dashboard-turbine
+eureka: #注册中心地址
+  client:
+    service-url:
+      defaultZone: http://localhost:8081/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: ofo-hystrix-dashboard-turbine
+turbine:
+  app-config: ofo-feign         #对指定实例运行状态进行监控
+  aggregator:
+    cluster-config: default           #指定聚合哪些集群，多个使用”,”分割，默认为 default
+  cluster-name-expression: new String("default")      #clusterNameExpression指定集群名称，默认表达式appName,默认default
+info:       #自定义实例的说明信息
+  app.name: ofo-hystrix-dashboard-turbine
+  company.name: null
+  build.artifactId: $project.artifactId$
+  build.verstion: $project.verstion$

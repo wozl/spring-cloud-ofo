@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>查找用户</title>
+		<link rel="stylesheet" href="../zui/css/zui.min.css" />
+		<link rel="stylesheet" href="../zui/lib/datatable/zui.datatable.min.css" />
+		<script type="text/javascript" src="../zui/lib/jquery/jquery.js" ></script>
+		<script src="../zui/lib/datatable/zui.datatable.min.js"></script>
+		<script type="text/javascript" src="../zui/js/zui.min.js" ></script>
+	</head>
+	<body>
+		
+		<div class="input-group" style="width:230px;">
+  		<span class="input-group-addon">用户名</span>
+  		<input type="text" class="form-control" placeholder="请输入要查找的用户名" id="name"  name="name">
+		</div>
+        <button class="btn btn-primary" type="button" onclick="find();" >开始查找</button>
+        
+        <table class="table datatable">
+    		<tbody>
+        		<tr>
+            		<th>用户ID</th>
+                	<th>用户昵称</th>
+                	<th>用户密码</th>
+            	</tr>
+       		</tbody>
+       		<tbody id="findusers">
+       		
+       		</tbody>
+    	</table>
+		
+	</body>
+	<script type="text/javascript">
+		
+		$(function(){
+			if(GateCookie("token")==false){
+				new $.zui.Messager('登录状态已失效，请重新登录!',{
+							icon:'exclamation-sign',
+							type:'warning'
+						}).show();
+				setTimeout(function(){
+					window.location.href="../login.html";
+				},2000); //2秒后跳转到登录页面
+			}
+		});
+		
+		//读取cookie
+	   function GateCookie(name){
+	   		var nameEQ = name + '=';
+			  var ca = document.cookie.split(';'); // 把cookie分割成组
+			  for (var i = 0; i < ca.length; i++) {
+			    var c = ca[i]; // 取得字符串
+			    while (c.charAt(0) == ' ') { // 判断一下字符串有没有前导空格
+			      c = c.substring(1, c.length); // 有的话，从第二位开始取
+			    }
+			    if (c.indexOf(nameEQ) == 0) { // 如果含有我们要的name
+			      return unescape(c.substring(nameEQ.length, c.length)); // 解码并截取我们要值
+			    }
+			  }
+			  return false;
+	   };
+		
+	function find(){
+		var name=document.getElementById("name").value;
+		//alert(name);
+		var auth;
+			if(GateCookie("token")==false){
+						auth="";
+					}else{
+						auth=GateCookie("token");
+					}
+		$.ajax({
+			headers: {
+						auth: GateCookie("token")
+				},
+			type:'post',
+			url:'/api/admin/FindUserInfoByName',
+			data:{"name":name},
+			success:function(data){
+				data=JSON.parse(data);
+				if(data.code==1021){
+					new $.zui.Messager(data.msg,{
+						icon:'exclamation-sign',
+						type:'danger'
+						}).show();
+					setTimeout(function(){
+						window.location.href="../login.html";
+						},2000); //2秒后跳转到登录页面
+					}
+					else if(data.code==1002){
+						new $.zui.Messager(data.msg,{
+							icon:'exclamation-sign',
+							type:'danger'
+						}).show();
+						setTimeout(function(){
+							window.location.href="../login.html";
+								},2000); //2秒后跳转到登录页面
+						}
+						else if(data.code==1){
+							data=data.data;
+							if(data.length>0){
+								$("#findusers").innerHTML='';
+								for(var i=0;i<data.length;i++){
+									document.getElementById("findusers").innerHTML+='<tr>'+
+										'<td>'+data[i].id+'</td>'+
+										'<td>'+data[i].username+'</td>'+
+										'<td>'+data[i].password+'</td>'
+									+'</tr>';
+									//$("#findusers").append("<tr>"+"<td>"+data[i].id+"</td>"+"<td>"+data[i].username+"</td>"+"<td>"+data[i].password+"</td>"+"</tr>");
+								}
+							}else{
+								new $.zui.Messager("暂无数据！",{
+								icon:'exclamation-sign',
+								type:'important'
+							}).show();
+								
+							}
+						}else{
+							new $.zui.Messager(data.msg,{
+								icon:'exclamation-sign',
+								type:'danger'
+							}).show();
+						}
+				
+				
+				/*for(var i=0;i<data.length;i++){
+					$("#findusers").append("<tr>"+"<td>"+data[i].id+"</td>"+"<td>"+data[i].username+"</td>"+"<td>"+data[i].password+"</td>"+"</tr>");
+				}*/
+			},
+			error:function(){
+				new $.zui.Messager("服务繁忙，请稍后再试!",{
+								icon:'exclamation-sign',
+								type:'danger'
+							}).show();
+			}
+		})
+	};
+	</script>
+</html>

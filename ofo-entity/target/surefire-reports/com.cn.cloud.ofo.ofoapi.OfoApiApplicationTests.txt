@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.cn.cloud.ofo.ofoapi.OfoApiApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.981 s - in com.cn.cloud.ofo.ofoapi.OfoApiApplicationTests

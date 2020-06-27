@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>欢迎登录</title>
+		<link rel="stylesheet" href="./zui/css/zui.min.css" type="text/css"/>
+		<script  src="zui/lib/jquery/jquery.js"></script>
+		<script  src="zui/js/zui.min.js"></script>
+	</head>
+	<style>
+		body{
+			background:url(./images/149.png) no-repeat center center;
+			background-size: cover;
+			background-attachment: fixed;
+			/*background-color: #CCCCCC;*/
+		}
+	</style>
+	<body style="background-image:url(images/149.png)">
+		<center>
+			<div id="post" style="width: 260px;">
+				<h3>欢迎使用ofo查询系统</h3>
+				<div class="input-group">
+				  <span class="input-group-addon"><i class="icon icon-user"></i></span>
+				  <input type="text" id="username" class="form-control" placeholder="用户名">
+				</div>
+				<br />
+				<div class="input-group">
+				  <span class="input-group-addon"><i class="icon icon-key"></i></span>
+				  <input type="password"  id="password" class="form-control" placeholder="密码">
+				</div>
+				<button class="btn" type="reset">重置</button>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <button class="btn btn-primary" type="button" onclick="Login();">登录</button>
+                <a href="register.html">立即注册</a>
+			</div>
+		</center>
+	</body>
+	<script type="text/javascript">
+			
+		
+		function Login(){ //登录
+			var username=$('#username').val().trim();
+			var passwd=$('#password').val().trim();
+			if(username ==null || username == undefined || username == ""){
+				 new $.zui.Messager('用户名不能为空',{
+					icon:'exclamation-sign',
+					type:'danger'
+				}).show();
+				return false;
+			}
+			if(passwd == null || passwd == undefined || username == ""){
+				new $.zui.Messager('密码不能为空',{
+					icon:'exclamation-sign',
+					type:'danger'
+				}).show();
+				return false;
+			}
+			$.ajax({
+				type:'post',
+				url:'/api/User/Login',
+				data:{"username":username,"password":passwd},
+				success:function(data){
+					//console.log(data);
+					data=JSON.parse(data);
+					if(data.code==1){
+						console.log(data.msg);
+						SetCookie("token",data.auth,1800); //设置半小时的cookie
+						SetCookie("name",data.username,1800); 
+						if(data.isadmin==1){
+							window.location.href="./admin/index.html";
+						}else{
+							window.location.href="./user/index.html";
+						}
+					}else{
+						 new $.zui.Messager(data.msg,{
+							icon:'exclamation-sign',
+							type:'warning'
+						}).show();
+					}
+				},
+				error:function(){
+					 new $.zui.Messager('网络错误，请稍后再试!',{
+							icon:'exclamation-sign',
+							type:'danger'
+						}).show();
+				}
+			});
+		};
+		
+		function test(){
+			var auth;
+			if(GateCookie("token")==false){
+				auth="";
+			}else{
+				auth=GateCookie("token");
+			}
+			$.ajax({
+				  headers: {
+				        auth: GateCookie("token")
+				    },
+				type:"post",
+				url:"http://127.0.0.1:7610/admin/FindUserInfoByName",
+				//dataType:"json",
+				//contentType:'application/json;charset=utf-8',
+				data:{"name":"zhangsan"},//JSON.stringify({}),
+				success:function(data){
+					console.log(data);
+				},
+				error:function(){
+					console.log("err");
+				}
+			});
+		};
+		
+		//设置cookie(名称，值,有效时间(秒))
+	   function SetCookie(name,value,seconds){
+	   		seconds = seconds || 0; //有值就直接赋值，没有默认为0
+	   		var expires = "";
+	   		if(seconds!=0){ //设置有效时间
+	   			var date = new Date();
+	   			date.setTime(date.getTime()+(seconds*1000));
+	   			expires = "; expires="+date.toGMTString();
+	   		}
+	   		document.cookie=name + "="+escape(value)+expires+";path=/";  //转码赋值
+	   };
+		
+		//读取cookie
+	   function GateCookie(name){
+	   		var nameEQ = name + '=';
+			  var ca = document.cookie.split(';'); // 把cookie分割成组
+			  for (var i = 0; i < ca.length; i++) {
+			    var c = ca[i]; // 取得字符串
+			    while (c.charAt(0) == ' ') { // 判断一下字符串有没有前导空格
+			      c = c.substring(1, c.length); // 有的话，从第二位开始取
+			    }
+			    if (c.indexOf(nameEQ) == 0) { // 如果含有我们要的name
+			      return unescape(c.substring(nameEQ.length, c.length)); // 解码并截取我们要值
+			    }
+			  }
+			  return false;
+	   };
+	</script>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>所有用户</title>
+		<link rel="stylesheet" href="../zui/css/zui.min.css" />
+		<link rel="stylesheet" href="../zui/lib/datatable/zui.datatable.min.css" />
+		<script type="text/javascript" src="../zui/lib/jquery/jquery.js" ></script>
+		<script src="../zui/lib/datatable/zui.datatable.min.js"></script>
+		<script type="text/javascript" src="../zui/js/zui.min.js" ></script>
+	</head>
+	<body>
+		<table class="table datatable">
+        	<tr>
+        		<th>用户ID</th>
+                <th>用户昵称</th>
+                <th>用户密码</th>
+                <th>操作</th>
+            </tr>
+           	<tbody id="list_info">
+           		
+           	</tbody>
+    	<!--<c:if test=""><h2>暂时没有信息</h2></c:if>
+        	<c:forEach var="msg" items="${users}" varStatus="sta">
+        	<tr>
+        		<td>${msg.id}</td>
+            	<td>${msg.username}</td>
+                <td>${msg.password}</td>
+                <td><a  data-toggle="modal" data-target="#myModal" onclick="addmsg(this);">更新</a>&nbsp;&nbsp;<a data-toggle="modal" data-target="#del"  onclick="deluser(this);">删除</a></td>
+            </tr>
+            </c:forEach>-->
+    </table>
+    
+    <div class="modal fade" id="myModal">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	    	<div class="modal-header">
+	        	<button type="button" class="close" data-dismiss="modal" >
+	            	<span aria-hidden="true"> x </span>
+	                <span class="sr-only"></span>
+	            </button>
+	            <h4 class="modal-title">修改用户信息:</h4>
+	        </div>
+	        <div style="display: none;"><span id="cheid"></span></div>
+	      	<div class="input-group">
+	 				 <span class="input-group-addon">&nbsp;&nbsp;&nbsp;用户名：&nbsp;&nbsp;&nbsp;</span>
+	  				<input type="text" class="form-control" placeholder="用户名"  id="upname" name="upname">
+			</div>
+				<br>
+	        <div class="input-group">
+	 				 <span class="input-group-addon">&nbsp;&nbsp;&nbsp;密&nbsp;&nbsp;&nbsp;码：					&nbsp;&nbsp;&nbsp;</span>
+	  				<input type="text" class="form-control" placeholder="密码" id="uppassword" name="uppassword">
+	 				
+			</div>
+	    </div>
+	    <div class="modal-footer">
+	    	<button class="btn btn-default" type="button" data-dismiss="modal">取消</button>
+	        <button class="btn btn-primary" onclick="updateuser();" type="button" data-dismiss="modal" >确定</button>
+	    </div>
+	  </div>
+	</div>
+    
+    <div class="modal fade" id="del">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	    	<div style="display: none;"><span id="delid"></span></div>
+	    	<h3>您确定要删除么？</h3>
+	      	 <div class="modal-footer">
+	    	<button class="btn btn-default" type="button" data-dismiss="modal">取消</button>
+	        <button class="btn btn-primary" onclick="deleteuser();" type="button" data-dismiss="modal" >确定</button>
+	    </div>
+	    </div>
+	  </div>
+	</div>
+	</body>
+	
+	<script type="text/javascript">
+		window.onload=function(){
+			getAlluser();
+		};
+	
+		
+		$(function(){
+			if(GateCookie("token")==false){
+				new $.zui.Messager('登录状态已失效，请重新登录!',{
+							icon:'exclamation-sign',
+							type:'warning'
+						}).show();
+				setTimeout(function(){
+					window.location.href="../login.html";
+				},2000); //2秒后跳转到登录页面
+			}else{
+				getAlluser();
+			}
+		});
+		
+		//读取cookie
+	   function GateCookie(name){
+	   		var nameEQ = name + '=';
+			  var ca = document.cookie.split(';'); // 把cookie分割成组
+			  for (var i = 0; i < ca.length; i++) {
+			    var c = ca[i]; // 取得字符串
+			    while (c.charAt(0) == ' ') { // 判断一下字符串有没有前导空格
+			      c = c.substring(1, c.length); // 有的话，从第二位开始取
+			    }
+			    if (c.indexOf(nameEQ) == 0) { // 如果含有我们要的name
+			      return unescape(c.substring(nameEQ.length, c.length)); // 解码并截取我们要值
+			    }
+			  }
+			  return false;
+	   };
+		
+		function delCookie() { //删除所有cookie
+		  var keys = document.cookie.match(/[^ =;]+(?==)/g);
+		  if (keys) {
+		    for (var i = keys.length; i--;) {
+		      document.cookie = keys[i] + '=0;path=/;expires=' + new Date(0).toUTCString(); // 清除当前域名下的,例如：m.ratingdog.cn
+		      document.cookie = keys[i] + '=0;path=/;domain=' + document.domain + ';expires=' + new Date(0).toUTCString(); // 清除当前域名下的，例如 .m.ratingdog.cn
+		      document.cookie = keys[i] + '=0;path=/;domain=ratingdog.cn;expires=' + new Date(0).toUTCString(); // 清除一级域名下的或指定的，例如 .ratingdog.cn
+		    }
+		  }
+		};
+		
+		/**获取所有用户信息列表**/
+		function getAlluser(){
+			var auth;
+			if(GateCookie("token")==false){
+				auth="";
+			}else{
+				auth=GateCookie("token");
+				}
+			$.ajax({
+				headers:{
+					auth: GateCookie("token")
+				},
+				type:'get',
+				url:'/api/admin/UserInfos',
+				data:{},
+				success:function(data){
+					data=JSON.parse(data);
+					console.log(data);
+					if(data.code==1021){
+						new $.zui.Messager(data.msg,{
+										icon:'exclamation-sign',
+										type:'danger'
+									}).show();
+						setTimeout(function(){
+										window.location.href="../login.html";
+									},2000); //2秒后跳转到登录页面	
+					}else if(data.code==1002){
+						new $.zui.Messager(data.msg,{
+										icon:'exclamation-sign',
+										type:'danger'
+									}).show();
+						setTimeout(function(){
+										window.location.href="../login.html";
+									},2000); //2秒后跳转到登录页面	
+					}else if(data.code==1){
+						data=data.data;
+						if(data.length>0){
+							for(var i=0;i<data.length;i++){
+								document.getElementById("list_info").innerHTML+='<tr>'+
+									'<td>'+data[i].id+'</td>'+
+									'<td>'+data[i].username+'</td>'+
+									'<td>'+data[i].password+'</td>'+
+									'<td><a  data-toggle="modal" data-target="#myModal" onclick="addmsg(this);">更新</a>&nbsp;&nbsp;<a data-toggle="modal" data-target="#del"  onclick="deluser(this);">删除</a></td>'+
+								'</tr>';
+							}
+						}else{
+							document.getElementById("list_info").innerHTML='<h2>暂无数据!</h2>';
+						}
+					}else{
+						new $.zui.Messager(data.msg,{
+									icon:'exclamation-sign',
+									type:'danger'
+								}).show();
+					}
+				},
+				error:function(){
+					new $.zui.Messager("系统繁忙，请稍后再试！",{
+									icon:'exclamation-sign',
+									type:'warning'
+								}).show();
+				}
+			});
+			
+		};
+		
+		
+		function addmsg(obj){ //弹出框赋值
+			var td=$(obj).parent();
+			var td2=td.prev().html().trim();//密码
+			var td3=td.prev().prev().html().trim();//用户名
+			var td4=td.prev().prev().prev().html().trim();//id
+			//alert(td2+"\n"+td3);
+			document.getElementById("upname").value=td3;
+			document.getElementById("uppassword").value=td2;
+			document.getElementById("cheid").value=td4;
+		};
+		
+		function deluser(objs){ //删除框赋值
+			var td=$(objs).parent();
+			var id=td.prev().prev().prev().html().trim();//id
+			document.getElementById("delid").value=id;
+		};
+		
+		function deleteuser(){ //删除
+			var id=document.getElementById("delid").value;
+			console.log(id);
+			var auth;
+			if(GateCookie("token")==false){
+				auth="";
+			}else{
+				auth=GateCookie("token");
+				}
+			$.ajax({
+				headers:{
+					auth: GateCookie("token")
+				},
+				type:'post',
+				url:'/api/admin/DelUser',
+				data:{"id":id},
+				success:function(data){
+					data=JSON.parse(data);
+					if(data.code==1021){
+						new $.zui.Messager(data.msg,{
+										icon:'exclamation-sign',
+										type:'danger'
+									}).show();
+						setTimeout(function(){
+										window.location.href="../login.html";
+									},2000); //2秒后跳转到登录页面	
+					}else if(data.code==1002){
+						new $.zui.Messager(data.msg,{
+										icon:'exclamation-sign',
+										type:'danger'
+									}).show();
+						setTimeout(function(){
+										window.location.href="../login.html";
+									},2000); //2秒后跳转到登录页面	
+					}else if(data.code==1){
+						new $.zui.Messager('删除成功!',{
+										icon:'exclamation-sign',
+										type:'success'
+									}).show();
+						setTimeout(function(){
+										window.location.reload(); //自动刷新页面
+									},2000); 
+					}else{
+						new $.zui.Messager(data.msg,{
+									icon:'exclamation-sign',
+									type:'danger'
+								}).show();
+					}
+				},
+				error:function(){
+					new $.zui.Messager("删除失败！系统繁忙，请稍后再试！",{
+									icon:'exclamation-sign',
+									type:'warning'
+								}).show();
+				}
+			});
+		};
+		
+		function updateuser(){ //更新用户信息
+			var id=document.getElementById("cheid").value;
+			var newname=document.getElementById("upname").value;
+			var newpassword=document.getElementById("uppassword").value;
+			//alert(id+"\t"+newname+"\t"+newpassword);
+			var auth;
+			if(GateCookie("token")==false){
+				auth="";
+			}else{
+				auth=GateCookie("token");
+				}
+			$.ajax({
+				headers:{
+					auth: GateCookie("token")
+				},
+				type:'post',
+				url:'/api/admin/UpdateUserInfos',
+				data:{"id":id,"username":newname,"password":newpassword},
+				success:function(data){
+					data=JSON.parse(data);
+					if(data.code==1021){
+						new $.zui.Messager(data.msg,{
+										icon:'exclamation-sign',
+										type:'danger'
+									}).show();
+						setTimeout(function(){
+										window.location.href="../login.html";
+									},2000); //2秒后跳转到登录页面	
+					}else if(data.code==1002){
+						new $.zui.Messager(data.msg,{
+										icon:'exclamation-sign',
+										type:'danger'
+									}).show();
+						setTimeout(function(){
+										window.location.href="../login.html";
+									},2000); //2秒后跳转到登录页面	
+					}else if(data.code==1){
+						new $.zui.Messager('信息更新成功!',{
+										icon:'exclamation-sign',
+										type:'success'
+									}).show();
+						setTimeout(function(){
+										window.location.reload(); //自动刷新页面
+									},2000); 
+					}else{
+						new $.zui.Messager(data.msg,{
+									icon:'exclamation-sign',
+									type:'danger'
+								}).show();
+					}
+					
+				},
+				error:function(){
+					new $.zui.Messager("系统繁忙，更新失败,请稍后再试！",{
+									icon:'exclamation-sign',
+									type:'warning'
+								}).show();
+				}
+			});
+		};
+		
+	</script>
+</html>

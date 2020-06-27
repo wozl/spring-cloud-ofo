@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>欢迎注册</title>
+		<link rel="stylesheet" href="zui/css/zui.min.css" />
+		<script type="text/javascript" src="zui/lib/jquery/jquery.js" ></script>
+		<script type="text/javascript" src="zui/js/zui.min.js" ></script>
+	</head>
+<style>
+	body{
+			background:url(./images/149.png) no-repeat center center;
+			background-size: cover;
+			background-attachment: fixed;
+			/*background-color: #CCCCCC;*/
+		}
+</style>
+<body style="background-image:url(images/3.png)">
+
+	<div>
+	<center>
+    	<div style="width:260px;">
+    	<h3>欢迎注册ofo密码查询系统</h3>
+    	<div class="input-group" style="background-color:#FFF">
+        	
+                	<span class="input-group-addon">用户名：</span>
+                	<input type="text" class="form-control" placeholder="用户名" id="username" name="username">
+                                	
+        </div>
+        <br>
+        <div class="input-group" style="background-color:#FFF">
+                	<span class="input-group-addon">密&nbsp;&nbsp;&nbsp;码：</span>
+                	<input type="password" class="form-control" placeholder="密码" id="password" name="password">
+        </div>
+        <button class="btn" type="reset">重置</button>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button class="btn btn-primary" type="button" onclick="go();">注册</button>
+    </center>
+    </div>
+	</div>
+</body>
+<script type="text/javascript">
+	
+	function chekUser(){
+    var uName = document.getElementById("username").value.trim();
+    
+    var patt = /^\S{3,82}$/;
+  
+    if (patt.test(uName)) {
+    	
+        return true;
+        
+    } else {
+       
+
+//点击按钮时显示漂浮消息
+//创建 Messger 实例
+var msg = $.zui.messager.show('　　骚年,用户名不能为空或长度出错！　　', {placement: 'top'});
+        return false;
+    }
+        
+}
+	function chekPwd(){
+		
+    var Pwd = document.getElementById("password").value.trim();
+    
+   var patt = /^\S{3,36}$/;
+  
+    if (patt.test(Pwd)) {
+    	
+        return true;
+        
+    } else {
+       
+
+     var msg = $.zui.messager.show('　　骚年,密码不能为空或长度出错！　　', {placement: 'top'});
+        return false;
+    }
+        
+}
+	
+
+
+function go(){
+	chekUser();
+	chekPwd();
+	var name=document.getElementById("username").value.trim();
+	var pwd=document.getElementById("password").value.trim();
+	$.ajax({
+		type:'post',
+		url:'/api/User/Reg',
+		data:{"username":name,"password":pwd},
+		success:function(data){
+			data=JSON.parse(data);
+			if(data.code==1){
+				new $.zui.Messager('注册成功，即将跳转到登录页!',{
+							icon:'exclamation-sign',
+							type:'success'
+						}).show();
+				setTimeout(function(){
+					window.location.href='login.html';
+				},2000);
+			}else{
+				new $.zui.Messager(data.msg,{
+							icon:'exclamation-sign',
+							type:'warning'
+						}).show();
+			}
+		},
+		error:function(){
+			new $.zui.Messager('网络错误，请稍后再试!',{
+							icon:'exclamation-sign',
+							type:'danger'
+						}).show();
+		}
+	});
+};
+</script>
+</html>

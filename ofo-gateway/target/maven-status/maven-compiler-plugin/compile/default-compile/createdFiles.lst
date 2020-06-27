@@ -1,0 +1,9 @@
+com\cn\cloud\ofo\ofogateway\config\FeignConfig$1.class
+com\cn\cloud\ofo\ofogateway\filter\LoginFilter.class
+com\cn\cloud\ofo\ofogateway\OfoGatewayApplication.class
+com\cn\cloud\ofo\ofogateway\services\AuthAPIServices.class
+com\cn\cloud\ofo\ofogateway\services\AuthAPIServicesHystrix.class
+com\cn\cloud\ofo\ofogateway\config\GatewayConfig.class
+com\cn\cloud\ofo\ofogateway\config\FeignConfig.class
+com\cn\cloud\ofo\ofogateway\config\FeignConfig$PhpMappingJackson2HttpMessageConverter.class
+com\cn\cloud\ofo\ofogateway\filter\MyFilter.class

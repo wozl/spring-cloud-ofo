@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="ofo-entity" />
+        <module name="ofo-eureka-server" />
+        <module name="ofo-feign" />
+        <module name="ofo-gateway" />
+        <module name="ofo-hystrix-dashboard-turbine" />
+        <module name="ofo-service" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="CloudOfo" target="1.8" />
+      <module name="ofo-config-server" target="1.8" />
+      <module name="ofo-entity" target="1.8" />
+      <module name="ofo-eureka-server" target="1.8" />
+      <module name="ofo-feign" target="1.8" />
+      <module name="ofo-gateway" target="1.8" />
+      <module name="ofo-hystrix-dashboard-turbine" target="1.8" />
+      <module name="ofo-service" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="CloudOfo" options="-parameters" />
+      <module name="ofo-config-server" options="-parameters" />
+      <module name="ofo-entity" options="-parameters" />
+      <module name="ofo-eureka-server" options="-parameters" />
+      <module name="ofo-feign" options="-parameters" />
+      <module name="ofo-gateway" options="-parameters" />
+      <module name="ofo-hystrix-dashboard-turbine" options="-parameters" />
+      <module name="ofo-service" options="-parameters" />
+    </option>
+  </component>
+</project>

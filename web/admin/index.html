@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>欢迎使用管理界面</title>
+		<link rel="stylesheet" href="../zui/css/zui.min.css" />
+		<script type="text/javascript" src="../zui/lib/jquery/jquery.js" ></script>
+		<script type="text/javascript" src="../zui/js/zui.min.js" ></script>
+	</head>
+	<body>
+		<div style="width=600px; height=400px">
+	    	<ul class="nav nav-tabs nav-justified">
+	       	  	<li><a href="#">欢迎管理员&nbsp;&nbsp;&nbsp;<strong><span id="ms"></span></strong></a></li>
+	        	<li><a href="../admin/addbike.html" target="showPage">添加车辆信息</a></li>
+	            <li><a href="../admin/alluser.html" target="showPage">所有用户</a></li>
+	            <li><a href="../admin/finduser.html" target="showPage">会员搜索</a></li>
+	            <li><a href="javascript:LoginOut();" >退出</a></li>
+	        </ul>
+	        <iframe id="showPage" noresize="noresize" name="showPage" width=1370px height=400px
+				frameborder=0 scrolling=no src="../admin/alluser.html"></iframe>
+	    </div>
+
+	</body>
+	
+	<script type="text/javascript">
+		$(function(){
+			if(GateCookie("token")==false){
+				new $.zui.Messager('登录状态已失效，请重新登录!',{
+							icon:'exclamation-sign',
+							type:'warning'
+						}).show();
+				setTimeout(function(){
+					window.location.href="../login.html";
+				},2000); //2秒后跳转到登录页面
+			}else{
+				$("#ms").html(GateCookie("name"));
+				 new $.zui.Messager('欢迎回来：'+GateCookie("name"), {
+					type:'success'
+			    }).show();
+			}
+		});
+		
+		//读取cookie
+	   function GateCookie(name){
+	   		var nameEQ = name + '=';
+			  var ca = document.cookie.split(';'); // 把cookie分割成组
+			  for (var i = 0; i < ca.length; i++) {
+			    var c = ca[i]; // 取得字符串
+			    while (c.charAt(0) == ' ') { // 判断一下字符串有没有前导空格
+			      c = c.substring(1, c.length); // 有的话，从第二位开始取
+			    }
+			    if (c.indexOf(nameEQ) == 0) { // 如果含有我们要的name
+			      return unescape(c.substring(nameEQ.length, c.length)); // 解码并截取我们要值
+			    }
+			  }
+			  return false;
+	   };
+	   
+	   function LoginOut(){ //退出登录
+	   		var auth;
+			if(GateCookie("token")==false){
+				auth="";
+			}else{
+				auth=GateCookie("token");
+			}
+			$.ajax({
+				headers: {
+				        auth: GateCookie("token")
+				    },
+				type:'post',
+				url:'/api/ofo/LoginOut',
+				data:{"auth":auth},
+				success:function(data){
+					data=JSON.parse(data);
+					if(data.code==1){
+						new $.zui.Messager('退出成功，欢迎下次登录',{
+							icon:'exclamation-sign',
+							type:'success'
+						}).show();
+						delCookie();
+						setTimeout(function(){
+								window.location.href="../login.html";
+							},2000); //2秒后跳转到登录页面
+					}else if(data.code==0){
+						new $.zui.Messager(data.msg+"参数为空，请重新登录。",{
+							icon:'exclamation-sign',
+							type:'danger'
+						}).show();
+						delCookie();
+						setTimeout(function(){
+								window.location.href="../login.html";
+							},2000); //2秒后跳转到登录页面
+					}else{
+						new $.zui.Messager(data.msg,{
+									icon:'exclamation-sign',
+									type:'danger'
+								}).show();
+					}
+				},
+				error:function(){
+					new $.zui.Messager("系统繁忙，请稍后再试!",{
+							icon:'exclamation-sign',
+							type:'danger'
+						}).show();
+				}
+			});
+	   };
+	   
+	   
+	   
+	   
+	    function delCookie() { //删除所有cookie
+		  var keys = document.cookie.match(/[^ =;]+(?==)/g);
+		  if (keys) {
+		    for (var i = keys.length; i--;) {
+		      document.cookie = keys[i] + '=0;path=/;expires=' + new Date(0).toUTCString(); // 清除当前域名下的,例如：m.ratingdog.cn
+		      document.cookie = keys[i] + '=0;path=/;domain=' + document.domain + ';expires=' + new Date(0).toUTCString(); // 清除当前域名下的，例如 .m.ratingdog.cn
+		      document.cookie = keys[i] + '=0;path=/;domain=ratingdog.cn;expires=' + new Date(0).toUTCString(); // 清除一级域名下的或指定的，例如 .ratingdog.cn
+		    }
+		  }
+		};
+	</script>
+</html>

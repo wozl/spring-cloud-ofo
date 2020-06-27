@@ -1,0 +1,30 @@
+server:
+  port: 8023
+spring:
+  application:
+    name: ofo-feign
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka0:8081/eureka/,http://eureka1:8082/eureka/,http://eureka2:8083/eureka/
+  instance:
+    instance-id: ofo-feign8023     #在eureka注册中心的主机名称
+    prefer-ip-address: true           #显示ip地址
+info:       #自定义实例的说明信息
+  app.name: cloud-ofo-feign_hystrix
+  company.name: null
+  build.artifactId: $project.artifactId$
+  build.verstion: $project.verstion$
+ribbon:
+  ReadTimeout: 60000   #default=1000
+  ConnectTimeout: 60000  #default=1000
+  maxAutoRetries: 0 #调用失败的重试次数
+
+feign:    #开启feign服务调用异常时的熔断机制，防止服务雪崩效应
+  hystrix:
+    enabled: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream
